@@ -1,0 +1,32 @@
+[
+  {
+    "Does the client have a job?": [
+      "Y",
+      "N"
+    ],
+    "subquestions": {
+      "Y": {
+        "Occupation type": [
+          "Laborers",
+          "Core staff",
+          "Accountants",
+          "Managers",
+          "Drivers",
+          "Sales staff",
+          "Cleaning staff",
+          "Cooking staff",
+          "Private service staff",
+          "Medicine staff",
+          "Security staff",
+          "High skill tech staff",
+          "Waiters/barmen staff",
+          "Low-skill Laborers",
+          "Realty agents",
+          "Secretaries",
+          "IT staff",
+          "HR staff"
+        ]
+      }
+    }
+  }
+]
