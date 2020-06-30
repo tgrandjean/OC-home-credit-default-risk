@@ -22,6 +22,7 @@ class LabelEncoder(LabelEncoder):
 
 
 class FeaturesBuilder():
+    """Manage features proprely."""
 
     BASICS = [
         'SK_ID_CURR',
@@ -37,24 +38,54 @@ class FeaturesBuilder():
         'EXT_SOURCE_3'
     ]
 
+    FILES = [
+        'application_train.csv',
+        'application_test.csv',
+        'bureau.csv',
+        'bureau_balance.csv',
+        'credit_card_balance.csv',
+        'installments_payments.csv',
+        'previous_application.csv',
+        'POS_CASH_balance.csv'
+    ]
+
     def __init__(self, data_path):
         self.data_path = Path(data_path).resolve()
         if not os.path.exists(self.data_path):
             raise ValueError("Path %s does not exist")
 
-    def __load(self, data_path):
-        self.app_test = pd.read_csv(data_path.joinpath('application_test.csv'))
-        self.bureau = pd.read_csv(data_path.joinpath('bureau.csv'))
-        self.bureau_balance = pd.read_csv(data_path.joinpath('bureau_balance.csv'))
-        self.credit_card = pd.read_csv(data_path.joinpath('credit_card_balance.csv'))
-        self.installments = pd.read_csv(data_path.joinpath('installments_payments.csv'))
-        self.previous_application = pd.read_csv(data_path.joinpath('previous_application.csv'))
-        self.pos_cash = pd.read_csv(data_path.joinpath('POS_CASH_balance.csv'))
+    def __load(self, file):
+        return pd.read_csv(self.data_path.joinpath(file))
+
+    @property
+    def data(self):
+        return self.__data
+
+    @data.setter
+    def data(self, dataframe):
+        if type(dataframe) != pd.DataFrame:
+            raise ValueError("Must be a pandas's dataframe.")
+        self.__data = dataframe
 
     @property
     def application_train(self):
-        self.app_train = pd.read_csv(self.data_path.joinpath('application_train.csv'))
+        """Return only relevant columns from the application_train file."""
+        self.app_train = self.__load(self.FILES[0])
         return self.app_train[self.BASICS]
+
+    def handle_categorical_features(self, strategy='le'):
+        """Handle categorical data.
+
+        strategy: should be one of "le" (LabelEncoder), "ohe" (OneHotEncoder)
+        or "auto" ("le" if only two modalities and "ohe" for the others)
+        """
+        for col in self.__data:
+            if self.__data[col].dtype.name == 'category':
+                pass
+
+    def build(self):
+        """Main entrypoint."""
+        self.data = self.application_train
 
 # Data loading
 def load_data(src=BASE_PATH.joinpath('data', 'processed')):
