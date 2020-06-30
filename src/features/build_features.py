@@ -2,12 +2,59 @@ import os
 from pathlib import Path
 import pandas as pd
 
+from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder, OneHotEncoder
 
 BASE_PATH = Path(__file__).resolve().parents[2]
+
+
+class LabelEncoder(LabelEncoder):
+    """Override the LabelEncoder in order to use it on pipeline."""
+
+    def fit_transform(self, y, *args, **kwargs):
+        return super().fit_transform(y)
+
+    def transform(self, y, *args, **kwargs):
+        return super().transform(y)
+
+
+class FeaturesBuilder():
+
+    BASICS = [
+        'SK_ID_CURR',
+        'DAYS_BIRTH',
+        'CODE_GENDER',
+        'OCCUPATION_TYPE',
+        'AMT_INCOME_TOTAL',
+        'AMT_CREDIT',
+        'NAME_CONTRACT_TYPE',
+        'AMT_ANNUITY',
+        'EXT_SOURCE_1',
+        'EXT_SOURCE_2',
+        'EXT_SOURCE_3'
+    ]
+
+    def __init__(self, data_path):
+        self.data_path = Path(data_path).resolve()
+        if not os.path.exists(self.data_path):
+            raise ValueError("Path %s does not exist")
+
+    def __load(self, data_path):
+        self.app_test = pd.read_csv(data_path.joinpath('application_test.csv'))
+        self.bureau = pd.read_csv(data_path.joinpath('bureau.csv'))
+        self.bureau_balance = pd.read_csv(data_path.joinpath('bureau_balance.csv'))
+        self.credit_card = pd.read_csv(data_path.joinpath('credit_card_balance.csv'))
+        self.installments = pd.read_csv(data_path.joinpath('installments_payments.csv'))
+        self.previous_application = pd.read_csv(data_path.joinpath('previous_application.csv'))
+        self.pos_cash = pd.read_csv(data_path.joinpath('POS_CASH_balance.csv'))
+
+    @property
+    def application_train(self):
+        self.app_train = pd.read_csv(self.data_path.joinpath('application_train.csv'))
+        return self.app_train[self.BASICS]
 
 # Data loading
 def load_data(src=BASE_PATH.joinpath('data', 'processed')):
@@ -17,13 +64,20 @@ def load_data(src=BASE_PATH.joinpath('data', 'processed')):
 # Define Pipeline here
 # In order to reuse the pipeline with various models, do not add the
 # estimator to the pipeline.
-# DEBUG:Column transformers!!! 
+categ_le_transformer = ColumnTransformer(
+    transformers=[
+        ('occupation_type', LabelEncoder(), ['OCCUPATION_TYPE',
+                                             'CODE_GENDER',
+                                             'NAME_CONTRACT_TYPE'])
+    ], remainder='passthrough'
+)
+
 lgb_pipeline = Pipeline([
     ('imputer', SimpleImputer(strategy='median')),
     ('scaler', MinMaxScaler()),
-    # ('encoder', LabelEncoder())
 ])
 
 if __name__ == '__main__':
     X, y = load_data()
-    print(lgb_pipeline.fit_transform(X))
+    X_enc = categ_le_transformer.fit_transform(X)
+    # print(lgb_pipeline.fit_transform(X_enc))
