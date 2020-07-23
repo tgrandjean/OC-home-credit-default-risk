@@ -16,8 +16,6 @@ except OSError:
     os.environ['KAGGLE_KEY'] = key
     import kaggle
 
-from src.features import build_features
-
 # Get data from kaggle
 DATASET_NAME = "home-credit-default-risk"
 
