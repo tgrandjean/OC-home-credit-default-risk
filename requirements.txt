@@ -79,7 +79,7 @@ pathtools==0.1.2
 pbr==5.4.5
 phik==0.9.12
 pickleshare==0.7.5
-Pillow==7.1.2
+Pillow==8.2.0
 plotly==4.8.1
 prettytable==0.7.2
 prometheus-client==0.7.1
